@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGPU Device Limits</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        #result {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .error {
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebGPU Device Limits</h1>
+    <p>This page will attempt to retrieve and display the WebGPU device limits for your current browser.</p>
+    <div id="result">Loading...</div>
+
+    <script>
+        async function getDeviceLimits() {
+            const resultDiv = document.getElementById('result');
+            try {
+                if (!navigator.gpu) {
+                    throw new Error("WebGPU is not supported in this browser.");
+                }
+
+                const adapter = await navigator.gpu.requestAdapter();
+                if (!adapter) {
+                    throw new Error("Failed to get GPU adapter.");
+                }
+
+                const device = await adapter.requestDevice();
+                if (!device) {
+                    throw new Error("Failed to get GPU device.");
+                }
+
+                const maxBufferSizeMB = (device.limits.maxBufferSize / 1048576).toFixed(2);
+                const maxStorageBufferBindingSizeMB = (device.limits.maxStorageBufferBindingSize / 1048576).toFixed(2);
+
+                resultDiv.innerHTML = `
+                    <strong>Max Buffer Size (Total):</strong> ${maxBufferSizeMB} MB<br>
+                    <strong>Max Storage Buffer Binding Size (Per Shader):</strong> ${maxStorageBufferBindingSizeMB} MB
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">Error: ${error.message}</span>`;
+            }
+        }
+
+        getDeviceLimits();
+    </script>
+</body>
+</html>
